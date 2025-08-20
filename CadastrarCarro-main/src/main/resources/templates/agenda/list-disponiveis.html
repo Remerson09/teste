@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Horários Disponíveis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h3>Horários Disponíveis</h3>
+    <hr/>
+
+    <!-- Mensagens de sucesso ou erro -->
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- Tabela de horários disponíveis -->
+    <table class="table table-bordered table-striped" th:if="${!agendasDisponiveis.isEmpty()}">
+        <thead class="table-dark">
+        <tr>
+            <th>Médico</th>
+            <th>Especialidade</th>
+            <th>Data e Hora</th>
+            <th>Status</th>
+            <th>Paciente</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ag : ${agendasDisponiveis}">
+            <td th:text="${ag.medico.nome}">Nome Médico</td>
+            <td th:text="${ag.medico.especialidade}">Especialidade</td>
+            <td th:text="${#temporals.format(ag.dataHoraInicio,'dd/MM/yyyy HH:mm')}">Data</td>
+            <td>
+                    <span th:text="${ag.status}"
+                          th:classappend="${ag.status == T(aula2603.model.entity.AgendaStatus).DISPONIVEL} ? 'badge bg-success' :
+                                         (${ag.status == T(aula2603.model.entity.AgendaStatus).AGENDADO} ? 'badge bg-warning text-dark' : 'badge bg-secondary')">
+                    </span>
+            </td>
+            <td th:text="${ag.consulta != null and ag.consulta.paciente != null ? ag.consulta.paciente.nome : '-'}">Paciente</td>
+            <td>
+                <a th:if="${ag.status == T(aula2603.model.entity.AgendaStatus).DISPONIVEL}"
+                   th:href="@{/agendas/agendar/{id}(id=${ag.id})}"
+                   class="btn btn-sm btn-primary">Agendar</a>
+                <a th:if="${ag.status != T(aula2603.model.entity.AgendaStatus).CANCELADO}"
+                   th:href="@{/agendas/cancelar/{id}(id=${ag.id})}"
+                   class="btn btn-sm btn-danger">Cancelar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Mensagem caso não existam horários -->
+    <div th:if="${agendasDisponiveis.isEmpty()}" class="alert alert-info">
+        Nenhum horário disponível no momento.
+    </div>
+
+    <a th:href="@{/agendas/disponiveis}" class="btn btn-secondary mt-2">Agendar Outra Consulta</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${paciente.id == null} ? 'Novo Paciente' : 'Editar Paciente'">Paciente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        }
+
+        .form-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header .subtitle {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-body {
+            padding: 2.5rem;
+        }
+
+        .form-floating {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.2rem 1rem 0.6rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .form-floating label {
+            color: #6c757d;
+            font-weight: 500;
+            padding: 1rem 1rem 0.6rem;
+        }
+
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .btn-group-custom {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            border-radius: 12px;
+            color: white;
+            transition: all 0.3s ease;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary-custom:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-secondary-custom {
+            background: #6c757d;
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            border-radius: 12px;
+            color: white;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 5;
+            transition: color 0.3s ease;
+        }
+
+        .form-control:focus + .form-floating label + .input-icon {
+            color: #007bff;
+        }
+
+        .phone-help {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .form-body {
+                padding: 1.5rem;
+            }
+
+            .btn-group-custom {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-user-injured me-2"></i>
+                <span th:text="${paciente.id == null} ? 'Novo Paciente' : 'Editar Paciente'">Novo Paciente</span>
+            </h1>
+            <p class="subtitle" th:text="${paciente.id == null} ? 'Cadastre um novo paciente no sistema' : 'Atualize as informações do paciente'">
+                Cadastre um novo paciente no sistema
+            </p>
+        </div>
+
+        <div class="form-body">
+            <form th:action="@{${paciente.id != null} ? '/pacientes/atualizar/' + ${paciente.id} : '/pacientes/salvar'}"
+                  th:object="${paciente}" method="post" novalidate>
+
+                <!-- Campo oculto para o ID -->
+                <input type="hidden" th:field="*{id}">
+
+                <!-- Nome -->
+                <div class="form-floating">
+                    <input type="text"
+                           class="form-control"
+                           id="nome"
+                           th:field="*{nome}"
+                           th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid' : ''"
+                           placeholder="Nome completo"
+                           required>
+                    <label for="nome">
+                        <i class="fas fa-user me-2"></i>Nome Completo
+                    </label>
+                    <i class="fas fa-user input-icon"></i>
+                    <div th:if="${#fields.hasErrors('nome')}" class="invalid-feedback">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        <span th:errors="*{nome}">Erro no nome</span>
+                    </div>
+                </div>
+
+                <!-- Telefone -->
+                <div class="form-floating">
+                    <input type="tel"
+                           class="form-control"
+                           id="telefone"
+                           th:field="*{telefone}"
+                           th:classappend="${#fields.hasErrors('telefone')} ? 'is-invalid' : ''"
+                           placeholder="Telefone"
+                           maxlength="15"
+                           required>
+                    <label for="telefone">
+                        <i class="fas fa-phone me-2"></i>Telefone
+                    </label>
+                    <i class="fas fa-phone input-icon"></i>
+                    <div class="phone-help">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Formato: (11) 99999-9999
+                    </div>
+                    <div th:if="${#fields.hasErrors('telefone')}" class="invalid-feedback">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        <span th:errors="*{telefone}">Erro no telefone</span>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="btn-group-custom">
+                    <button type="submit" class="btn-primary-custom">
+                        <i class="fas fa-save me-2"></i>
+                        <span th:text="${paciente.id == null} ? 'Salvar' : 'Atualizar'">Salvar</span>
+                    </button>
+                    <a th:href="@{/pacientes}" class="btn-secondary-custom">
+                        <i class="fas fa-times me-2"></i>
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Máscara para telefone
+    function formatPhone(value) {
+        // Remove tudo que não é dígito
+        value = value.replace(/\D/g, '');
+
+        // Aplica a máscara
+        if (value.length <= 10) {
+            // Telefone fixo: (11) 1234-5678
+            value = value.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        } else {
+            // Celular: (11) 99999-9999
+            value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        }
+
+        return value;
+    }
+
+    document.getElementById('telefone').addEventListener('input', function(e) {
+        e.target.value = formatPhone(e.target.value);
+    });
+
+    // Foco automático no primeiro campo
+    window.addEventListener('load', function() {
+        document.getElementById('nome').focus();
+    });
+
+    // Validação em tempo real
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input[required]');
+
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid') && this.value.trim() !== '') {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+
+    // Validação específica para telefone
+    document.getElementById('telefone').addEventListener('blur', function() {
+        const phone = this.value.replace(/\D/g, '');
+        if (phone.length < 10 || phone.length > 11) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    // Animação de envio do formulário
+    form.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+        submitBtn.disabled = true;
+
+        // Se houver erro de validação, restaurar o botão
+        setTimeout(() => {
+            if (document.querySelector('.is-invalid')) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }, 100);
+    });
+</script>
+</body>
+</html>

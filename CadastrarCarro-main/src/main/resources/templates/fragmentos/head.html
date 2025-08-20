@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- Fragment: Header Principal -->
+<div th:fragment="main-header" class="header">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/dashboard">
+                    <i class="fas fa-user-md me-2"></i>Sistema Clínica
+                </a>
+
+                <!-- Menu de navegação -->
+                <div class="navbar-nav me-auto">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                    <a class="nav-link" href="/pessoafisica/form">
+                        <i class="fas fa-user-plus me-1"></i>Novo Paciente
+                    </a>
+                    <a sec:authorize="hasAnyRole('ADMIN')" class="nav-link" href="/pessoafisica/list">
+                        <i class="fas fa-list me-1"></i>Listar Pacientes
+                    </a>
+                    <a sec:authorize="hasAnyRole('ADMIN')" class="nav-link" href="/admin">
+                        <i class="fas fa-cogs me-1"></i>Administração
+                    </a>
+                </div>
+
+                <!-- Informações do usuário -->
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar me-3">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="me-3">
+                        <div class="fw-bold">
+                            <span sec:authentication="name">usuário</span>
+                        </div>
+                        <small class="opacity-75">
+                            <span sec:authorize="hasAnyRole('ADMIN')" class="badge bg-danger">ADMIN</span>
+                            <span sec:authorize="hasAnyRole('USER')" class="badge bg-primary">USER</span>
+                        </small>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user">
+                                <i class="fas fa-user me-2"></i>Meu Perfil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/logout}" method="post" class="d-inline w-100">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Sair
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<!-- Fragment: Header Simples -->
+<div th:fragment="simple-header(title, subtitle)" class="header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h4 th:text="${title}">Título da Página</h4>
+                <p class="mb-0 opacity-75" th:text="${subtitle}">Subtítulo da página</p>
+            </div>
+            <div class="col-auto">
+                <a href="/dashboard" class="btn btn-light me-2">
+                    <i class="fas fa-arrow-left me-1"></i>Voltar
+                </a>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light">
+                        <i class="fas fa-sign-out-alt me-1"></i>Sair
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fragment: Breadcrumb -->
+<nav th:fragment="breadcrumb(items)" aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/dashboard">Dashboard</a>
+        </li>
+        <li th:each="item, iterStat : ${items}"
+            th:class="${iterStat.last} ? 'breadcrumb-item active' : 'breadcrumb-item'">
+            <a th:unless="${iterStat.last}" th:href="${item.url}" th:text="${item.name}">Item</a>
+            <span th:if="${iterStat.last}" th:text="${item.name}">Item Ativo</span>
+        </li>
+    </ol>
+</nav>
+
+<!-- Fragment: User Info Card -->
+<div th:fragment="user-info-card" class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            <div class="user-avatar me-3">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="flex-grow-1">
+                <h6 class="mb-1">
+                    <span sec:authentication="name">usuário</span>
+                    <span sec:authorize="hasAnyRole('ADMIN')" class="badge bg-danger ms-2">ADMIN</span>
+                    <span sec:authorize="hasAnyRole('USER')" class="badge bg-primary ms-2">USER</span>
+                </h6>
+                <small class="text-muted">
+                    <i class="fas fa-clock me-1"></i>
+                    Sessão ativa - <span id="sessionTime">Agora</span>
+                </small>
+            </div>
+            <div>
+                <a href="/user" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-edit me-1"></i>Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fragment: Alert Messages -->
+<div th:fragment="alert-messages">
+    <!-- Mensagem de sucesso -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}">Mensagem de sucesso</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${error}">Mensagem de erro</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Mensagem de informação -->
+    <div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <span th:text="${info}">Mensagem de informação</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Mensagem de aviso -->
+    <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${warning}">Mensagem de aviso</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<!-- Fragment: Loading Spinner -->
+<div th:fragment="loading-spinner" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2 text-muted">Carregando dados...</p>
+</div>
+
+<!-- Fragment: Empty State -->
+<div th:fragment="empty-state(icon, title, message, actionText, actionUrl)" class="text-center py-5">
+    <i th:class="'fas fa-' + ${icon} + ' fa-4x text-muted mb-3'"></i>
+    <h5 th:text="${title}">Título</h5>
+    <p class="text-muted" th:text="${message}">Mensagem</p>
+    <a th:if="${actionText and actionUrl}" th:href="${actionUrl}"
+       th:text="${actionText}" class="btn btn-primary">Ação</a>
+</div>
+
+<!-- Fragment: Footer -->
+<footer th:fragment="main-footer" class="mt-5 py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-user-md me-2"></i>Sistema Clínica</h6>
+                <p class="text-muted mb-0">
+                    Desenvolvido com Spring Security e Thymeleaf
+                </p>
+            </div>
+            <div class="col-md-6 text-end">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Sessão segura -
+                    <span sec:authorize="hasAnyRole('ADMIN')" class="text-danger">Administrador</span>
+                    <span sec:authorize="hasAnyRole('USER')" class="text-primary">Usuário</span>
+                </small>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Fragment: Common Scripts -->
+<div th:fragment="common-scripts">
+    <script>
+        // Atualizar tempo de sessão
+        function updateSessionTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('sessionTime');
+            if (timeElement) {
+                timeElement.textContent = now.toLocaleString('pt-BR');
+            }
+        }
+
+        // Atualizar a cada minuto
+        updateSessionTime();
+        setInterval(updateSessionTime, 60000);
+
+        // Auto-dismiss alerts após 5 segundos
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Confirmação de logout
+        document.querySelectorAll('form[action*="/logout"] button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Tem certeza que deseja sair do sistema?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</div>
+
+<!-- Fragment: Common Styles -->
+<style th:fragment="common-styles">
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+
+    .navbar-brand {
+        font-weight: 600;
+        font-size: 1.3rem;
+    }
+
+    .nav-link {
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+        border-radius: 5px;
+    }
+</style>
+</body>
+</html>

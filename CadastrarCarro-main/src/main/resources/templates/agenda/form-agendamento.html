@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendar Consulta</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .form-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .form-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-header {
+      background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .form-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    }
+
+    .form-header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-header .subtitle {
+      margin: 0.5rem 0 0 0;
+      opacity: 0.9;
+      font-size: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-body {
+      padding: 2.5rem;
+    }
+
+    .appointment-info {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-left: 5px solid #fd7e14;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .appointment-info h5 {
+      color: #495057;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .info-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+
+    .info-content {
+      flex: 1;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #495057;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+      color: #6c757d;
+      font-size: 1rem;
+    }
+
+    .form-floating {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .form-select {
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 1.2rem 1rem 0.6rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .form-select:focus {
+      border-color: #fd7e14;
+      box-shadow: 0 0 0 0.2rem rgba(253, 126, 20, 0.25);
+      background: white;
+      transform: translateY(-2px);
+    }
+
+    .form-select.is-invalid {
+      border-color: #dc3545;
+      background: #fff5f5;
+    }
+
+    .form-floating label {
+      color: #6c757d;
+      font-weight: 500;
+      padding: 1rem 1rem 0.6rem;
+    }
+
+    .invalid-feedback {
+      display: block;
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      padding-left: 1rem;
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .btn-group-custom {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn-primary-custom {
+      background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+      border: none;
+      padding: 1rem 2rem;
+      font-weight: 600;
+      border-radius: 12px;
+      color: white;
+      transition: all 0.3s ease;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary-custom::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary-custom:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary-custom:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(253, 126, 20, 0.3);
+    }
+
+    .btn-secondary-custom {
+      background: #6c757d;
+      border: none;
+      padding: 1rem 2rem;
+      font-weight: 600;
+      border-radius: 12px;
+      color: white;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-secondary-custom:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+      color: white;
+      text-decoration: none;
+    }
+
+    .alert-custom {
+      border-radius: 12px;
+      border: none;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .alert-danger-custom {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+      color: white;
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      z-index: 5;
+      transition: color 0.3s ease;
+    }
+
+    .form-select:focus + .form-floating label + .input-icon {
+      color: #fd7e14;
+    }
+
+    @media (max-width: 768px) {
+      .form-container {
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+      }
+
+      .form-body {
+        padding: 1.5rem;
+      }
+
+      .btn-group-custom {
+        flex-direction: column;
+      }
+
+      .info-item {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .info-icon {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="form-container">
+  <div class="form-card">
+    <div class="form-header">
+      <h1>
+        <i class="fas fa-calendar-plus me-2"></i>
+        Confirmar Agendamento
+      </h1>
+      <p class="subtitle">
+        Finalize o agendamento da sua consulta
+      </p>
+    </div>
+
+    <div class="form-body">
+      <!-- Informações do horário selecionado -->
+      <div class="appointment-info">
+        <h5>
+          <i class="fas fa-info-circle me-2"></i>
+          Horário Selecionado
+        </h5>
+
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-user-md"></i>
+          </div>
+          <div class="info-content">
+            <div class="info-label">Médico(a)</div>
+            <div class="info-value" th:text="${agenda.medico.nome}">Nome do Médico</div>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="info-content">
+            <div class="info-label">Data e Hora</div>
+            <div class="info-value" th:text="${#temporals.format(agenda.dataHoraInicio,'dd/MM/yyyy HH:mm')}">Data e Hora</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensagem de erro -->
+      <div th:if="${error}" class="alert alert-danger-custom" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${error}">Erro</span>
+      </div>
+
+      <form th:action="@{/agendas/agendar}" th:object="${consulta}" method="post" novalidate>
+        <input type="hidden" name="agendaId" th:value="${agenda.id}"/>
+
+        <!-- Seleção do Paciente -->
+        <div class="form-floating">
+          <select id="paciente"
+                  th:field="*{paciente}"
+                  class="form-select"
+                  th:classappend="${#fields.hasErrors('paciente')} ? 'is-invalid' : ''"
+                  required>
+            <option value="">-- Selecione o Paciente --</option>
+            <option th:each="pac : ${pacientes}"
+                    th:value="${pac.id}"
+                    th:text="${pac.nome}">Nome do Paciente</option>
+          </select>
+          <label for="paciente">
+            <i class="fas fa-user-injured me-2"></i>Paciente
+          </label>
+          <i class="fas fa-user-injured input-icon"></i>
+          <div th:if="${#fields.hasErrors('paciente')}" class="invalid-feedback">
+            <i class="fas fa-exclamation-circle me-1"></i>
+            <span th:errors="*{paciente}">Selecione um paciente</span>
+          </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="btn-group-custom">
+          <button type="submit" class="btn-primary-custom">
+            <i class="fas fa-check me-2"></i>
+            Confirmar Agendamento
+          </button>
+          <a th:href="@{/agendas/disponiveis}" class="btn-secondary-custom">
+            <i class="fas fa-arrow-left me-2"></i>
+            Voltar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Foco automático no campo de seleção
+  window.addEventListener('load', function() {
+    document.getElementById('paciente').focus();
+  });
+
+  // Validação em tempo real
+  const form = document.querySelector('form');
+  const pacienteSelect = document.getElementById('paciente');
+
+  pacienteSelect.addEventListener('change', function() {
+    if (this.value === '') {
+      this.classList.add('is-invalid');
+    } else {
+      this.classList.remove('is-invalid');
+    }
+  });
+
+  // Animação de envio do formulário
+  form.addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+
+    // Validar se paciente foi selecionado
+    if (pacienteSelect.value === '') {
+      e.preventDefault();
+      pacienteSelect.classList.add('is-invalid');
+      pacienteSelect.focus();
+      return;
+    }
+
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Agendando...';
+    submitBtn.disabled = true;
+
+    // Se houver erro de validação, restaurar o botão
+    setTimeout(() => {
+      if (document.querySelector('.is-invalid')) {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    }, 100);
+  });
+
+  // Animação de entrada dos elementos
+  const infoItems = document.querySelectorAll('.info-item');
+  infoItems.forEach((item, index) => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateX(-20px)';
+
+    setTimeout(() => {
+      item.style.transition = 'all 0.5s ease-out';
+      item.style.opacity = '1';
+      item.style.transform = 'translateX(0)';
+    }, 200 + (index * 100));
+  });
+</script>
+</body>
+</html>
